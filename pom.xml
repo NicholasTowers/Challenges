@@ -22,7 +22,7 @@
         <version>3.0.0-M3</version>
         <configuration>
           <includes>
-            <include>NetworkServiceTest.java</include>
+            <include>src/test/java/NetworkServiceTest.java</include>
           </includes>
         </configuration>
       </plugin>
