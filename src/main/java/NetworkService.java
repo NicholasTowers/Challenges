@@ -6,7 +6,7 @@ import java.util.*;
 
     private RailNetwork network;
 
-    public NetworkService(final String railwayNetwork) {
+    NetworkService(final String railwayNetwork) {
         NetworkBuilder networkToBeBuilt = new NetworkBuilder();
         String[] separatedRoutes = railwayNetwork.split(", ");
         for (String individualRoute:separatedRoutes) {
@@ -17,7 +17,7 @@ import java.util.*;
 
     public String calculateDistance(final List<Station> visitedStations) {
         int currentRouteLength = 0;
-        boolean routeExists = false;
+        boolean routeExists;
         for (int i = 0; i < visitedStations.size() - 1; i++) {
             routeExists = false;
             for (Route routesfromCurrentStation: this.network.getNetwork().get(visitedStations.get(i))) {
@@ -78,19 +78,16 @@ import java.util.*;
                         return "NO SUCH ROUTE";
                     }
                     int distanceThroughCurrentNeighbour = neighbour.getDistanceBetweenStations() + Integer.parseInt(shortestDistanceFromNeighbour);
-
-                    if (distanceThroughCurrentNeighbour < totalRouteDistance) {
-                        totalRouteDistance = distanceThroughCurrentNeighbour;
-                    }
+                    totalRouteDistance = Math.min(distanceThroughCurrentNeighbour,totalRouteDistance);
 
                     visitedOnCurrentRoute.remove(neighbour.getTerminatingStation());
                 }
             }
             if (totalRouteDistance == ROUTE_DISTANCE_UPPER_BOUND) {
                 return "NO SUCH ROUTE";
-            } else {
-                return Integer.toString(totalRouteDistance);
             }
+            return Integer.toString(totalRouteDistance);
+
     }
 
     public Integer calculateNumberOfRoutesUnderASetDistance(final Station startingStation, final Station terminatingStation, final Integer distanceRemaining) {
