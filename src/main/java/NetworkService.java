@@ -18,10 +18,12 @@ import java.util.*;
     public String calculateDistance(final List<Station> visitedStations) {
         int currentRouteLength = 0;
         boolean routeExists;
-        for (int i = 0; i < visitedStations.size() - 1; i++) {
+            if (visitedStations.size()<=1){
+                return "0";
+            }
             routeExists = false;
-            for (Route routesfromCurrentStation: this.network.getNetwork().get(visitedStations.get(i))) {
-                if (routesfromCurrentStation.getTerminatingStation().equals(visitedStations.get(i + 1))) {
+            for (Route routesfromCurrentStation: this.network.getNetwork().get(visitedStations.get(0))) {
+                if (routesfromCurrentStation.getTerminatingStation().equals(visitedStations.get(1))) {
                     currentRouteLength += routesfromCurrentStation.getDistanceBetweenStations();
                     routeExists = true;
                 }
@@ -29,24 +31,24 @@ import java.util.*;
             if (!routeExists) {
                 return "NO SUCH ROUTE";
             }
-        }
-        return Integer.toString(currentRouteLength);
+        String intermediateResult = calculateDistance(visitedStations.subList(1,visitedStations.size()));
+        return (intermediateResult.equals("NO SUCH ROUTE"))? intermediateResult : Integer.toString(currentRouteLength+Integer.parseInt(intermediateResult));
     }
 
     public Integer calculateNumberOfRoutesWithExactNumberOfStops(final Station startingStation, final Station terminatingStation, final Integer exactNumberOfStops) {
         int currentRouteCount = 0;
-        if (exactNumberOfStops == 1) {
-            for (Route neighbour: network.getNetwork().get(startingStation)) {
-                if (neighbour.getTerminatingStation().equals(terminatingStation)) {
-                    return 1;
-                }
+            if (startingStation.equals(terminatingStation) && exactNumberOfStops==0){
+                return 1;
+            }else if (exactNumberOfStops==0) {
+                return 0;
             }
-            return 0;
-        } else {
+
             for (Route neighbour : network.getNetwork().get(startingStation)) {
+
                 currentRouteCount += calculateNumberOfRoutesWithExactNumberOfStops(neighbour.getTerminatingStation(), terminatingStation, exactNumberOfStops - STOPS_BETWEEN_NEIGHBOURS);
+
             }
-        }
+
         return currentRouteCount;
     }
 
@@ -58,47 +60,45 @@ import java.util.*;
         return totalNumberOfRoutes;
     }
 
+
+
     public String calculateShortestDistance(final Station startingStation, final Station terminatingStation) {
-        return calculateShortestDistance(startingStation, terminatingStation, new ArrayList<>());
-    }
-
-    private String calculateShortestDistance(final Station startingStation, final Station terminatingStation, final List<Station> visitedOnCurrentRoute) {
-            int totalRouteDistance = ROUTE_DISTANCE_UPPER_BOUND;
-            if (visitedOnCurrentRoute.contains(terminatingStation)) {
-                return "0";
+            Map<Station,Integer> curWeights;
+            curWeights = new HashMap<>();
+            for (Station station: this.network.getNetwork().keySet()) {
+                curWeights.put(station, ROUTE_DISTANCE_UPPER_BOUND);
             }
-            for (Route neighbour : this.network.getNetwork().get(startingStation)) {
-                if (!visitedOnCurrentRoute.contains(neighbour.getTerminatingStation())) {
-
-                    visitedOnCurrentRoute.add(neighbour.getTerminatingStation());
-
-                    String shortestDistanceFromNeighbour = calculateShortestDistance(neighbour.getTerminatingStation(), terminatingStation, visitedOnCurrentRoute);
-
-                    if (shortestDistanceFromNeighbour.equals("NO SUCH ROUTE")) {
-                        return "NO SUCH ROUTE";
+            curWeights.put(startingStation,0);
+            PriorityQueue<Station> k;
+            k = new PriorityQueue<>(this.network.getNetwork().size(), Comparator.comparingInt(curWeights::get));
+            k.add(startingStation);
+            do {
+                Station curStation = k.poll();
+                for (Route neighbour: this.network.getNetwork().get(curStation)){
+                    if(curWeights.get(neighbour.getTerminatingStation())>=ROUTE_DISTANCE_UPPER_BOUND) {
+                        k.add(neighbour.getTerminatingStation());
                     }
-                    int distanceThroughCurrentNeighbour = neighbour.getDistanceBetweenStations() + Integer.parseInt(shortestDistanceFromNeighbour);
-                    totalRouteDistance = Math.min(distanceThroughCurrentNeighbour,totalRouteDistance);
+                    curWeights.put(neighbour.getTerminatingStation(),Math.min(curWeights.get(curStation)+neighbour.getDistanceBetweenStations(),curWeights.get(neighbour.getTerminatingStation())));
 
-                    visitedOnCurrentRoute.remove(neighbour.getTerminatingStation());
                 }
-            }
-            if (totalRouteDistance == ROUTE_DISTANCE_UPPER_BOUND) {
+                if (startingStation.equals(curStation)){
+                    curWeights.put(startingStation,ROUTE_DISTANCE_UPPER_BOUND);
+                }
+            }while (!k.isEmpty() && !(k.peek().equals(terminatingStation)));
+            if (curWeights.get(terminatingStation) == ROUTE_DISTANCE_UPPER_BOUND ){
                 return "NO SUCH ROUTE";
             }
-            return Integer.toString(totalRouteDistance);
-
+            return String.valueOf(curWeights.get(terminatingStation));
     }
 
     public Integer calculateNumberOfRoutesUnderASetDistance(final Station startingStation, final Station terminatingStation, final Integer distanceRemaining) {
         int numberOfRoutes = 0;
 
         for (Route neighbour : this.network.getNetwork().get(startingStation)) {
-
-            if (neighbour.getTerminatingStation().equals(terminatingStation) && neighbour.getDistanceBetweenStations() < distanceRemaining) {
-                numberOfRoutes += 1;
-            } else if (neighbour.getDistanceBetweenStations() > distanceRemaining) {
+            if (neighbour.getDistanceBetweenStations() >= distanceRemaining) {
                 continue;
+            } else if (neighbour.getTerminatingStation().equals(terminatingStation)) {
+                numberOfRoutes += 1;
             }
 
             numberOfRoutes += calculateNumberOfRoutesUnderASetDistance(neighbour.getTerminatingStation(), terminatingStation, distanceRemaining - neighbour.getDistanceBetweenStations());
