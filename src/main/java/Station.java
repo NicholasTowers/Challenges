@@ -1,8 +1,6 @@
 final class Station {
     private char stationName;
 
-    Station() {
-    }
 
     Station(final char stationName) {
         this.stationName = stationName;
