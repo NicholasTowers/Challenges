@@ -7,7 +7,7 @@ final class RailNetwork {
         this.network = new HashMap<>();
     }
 
- 
+
 
     Map<Station, List<Route>> getNetwork() {
         return network;
