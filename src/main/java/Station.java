@@ -10,7 +10,7 @@ final class Station {
         return stationName;
     }
 
- 
+
 
     @Override
     public boolean equals(final Object o) {
