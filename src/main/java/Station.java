@@ -10,9 +10,7 @@ final class Station {
         return stationName;
     }
 
-    void setStationName(final char stationName) {
-        this.stationName = stationName;
-    }
+ 
 
     @Override
     public boolean equals(final Object o) {
