@@ -1,15 +1,19 @@
+import javax.print.DocFlavor;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public final class NetworkService implements RailwayNetworkService {
     private static final int ROUTE_DISTANCE_UPPER_BOUND = 10000;
     private static final int STOPS_BETWEEN_NEIGHBOURS = 1;
+    private static final String ROUTE_DELIMITER = ", ";
+    private static final String NO_SUCH_ROUTE = "NO SUCH ROUTE";
+    private static final String ZERO_LENGTH = "0";
 
     private RailNetwork network;
 
     NetworkService(final String railwayNetwork) {
         NetworkBuilder networkToBeBuilt = new NetworkBuilder();
-        String[] separatedRoutes = railwayNetwork.split(", ");
+        String[] separatedRoutes = railwayNetwork.split(ROUTE_DELIMITER);
         for (String individualRoute:separatedRoutes) {
             networkToBeBuilt.withRoute(individualRoute);
         }
@@ -20,7 +24,7 @@ public final class NetworkService implements RailwayNetworkService {
         int currentRouteLength = 0;
         boolean routeExists;
             if (visitedStations.size()<=1){
-                return "0";
+                return ZERO_LENGTH;
             }
             final Route b;
             b = this.network.getNetwork().get(visitedStations.get(0)).stream().filter((link)->
@@ -33,7 +37,7 @@ public final class NetworkService implements RailwayNetworkService {
 
 
         String intermediateResult = calculateDistance(visitedStations.subList(1,visitedStations.size()));
-        return (!routeExists ||intermediateResult.equals("NO SUCH ROUTE"))? "NO SUCH ROUTE" : Integer.toString(currentRouteLength+Integer.parseInt(intermediateResult));
+        return (!routeExists ||intermediateResult.equals(NO_SUCH_ROUTE))? NO_SUCH_ROUTE : Integer.toString(currentRouteLength+Integer.parseInt(intermediateResult));
     }
 
     public Integer calculateNumberOfRoutesWithExactNumberOfStops(final Station startingStation, final Station terminatingStation, final Integer exactNumberOfStops) {
@@ -79,8 +83,8 @@ public final class NetworkService implements RailwayNetworkService {
 
                     String shortestDistanceFromNeighbour = calculateShortestDistance(neighbour.getTerminatingStation(), terminatingStation, visitedOnCurrentRoute);
 
-                    if (shortestDistanceFromNeighbour.equals("NO SUCH ROUTE")) {
-                        return "NO SUCH ROUTE";
+                    if (shortestDistanceFromNeighbour.equals(NO_SUCH_ROUTE)) {
+                        return NO_SUCH_ROUTE;
                     }
                     int distanceThroughCurrentNeighbour = neighbour.getDistanceBetweenStations() + Integer.parseInt(shortestDistanceFromNeighbour);
                     totalRouteDistance = Math.min(distanceThroughCurrentNeighbour,totalRouteDistance);
@@ -89,7 +93,7 @@ public final class NetworkService implements RailwayNetworkService {
 
             }
             if (totalRouteDistance == ROUTE_DISTANCE_UPPER_BOUND) {
-                return "NO SUCH ROUTE";
+                return NO_SUCH_ROUTE;
             }
             return Integer.toString(totalRouteDistance);
 
@@ -109,6 +113,5 @@ public final class NetworkService implements RailwayNetworkService {
         }
         return numberOfRoutes;
     }
-    public static void main(final String[] args) {
-    }
+
 }
