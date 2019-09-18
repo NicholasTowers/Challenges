@@ -1,7 +1,7 @@
 import java.util.*;
 import java.util.stream.Collectors;
 
-public final class NetworkService implements RailwayNetworkService {
+ public final class  NetworkService implements RailwayNetworkService {
     private static final int ROUTE_DISTANCE_UPPER_BOUND = 10000;
     private static final int STOPS_BETWEEN_NEIGHBOURS = 1;
     private static final String ROUTE_DELIMITER = ", ";

@@ -1,5 +1,7 @@
+import lombok.Data;
 import java.util.*;
 
+@Data
 final class RailNetwork {
     private Map<Station, List<Route>> network;
 
@@ -9,7 +11,4 @@ final class RailNetwork {
 
 
 
-    Map<Station, List<Route>> getNetwork() {
-        return network;
-    }
 }

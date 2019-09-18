@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-
 final class NetworkBuilder {
     private RailNetwork railNetwork;
     private static final int DEPARTING_STATION_INDEX = 0;
